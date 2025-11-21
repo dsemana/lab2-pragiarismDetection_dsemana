@@ -1,7 +1,7 @@
 import os
 import string
 
-
+#stop words to exclude from analysis
 STOP_WORDS = {
     "a",
     "an",
@@ -19,7 +19,7 @@ STOP_WORDS = {
     "from",
 }
 
-
+#funtion to read file content
 def read_file_text(path: str) -> str:
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -30,13 +30,13 @@ def read_file_text(path: str) -> str:
         print(f"Error reading file '{path}': {exc}")
     return ""
 
-
+#function to normalize text by lowercasing and removing punctuation
 def _normalize_text(text: str) -> str:
     text = text.lower()
     translator = str.maketrans("", "", string.punctuation)
     return text.translate(translator)
 
-
+#function to process text into cleaned list of words
 def process_text(raw_text: str) -> list[str]:
     if not raw_text:
         return []
@@ -46,7 +46,7 @@ def process_text(raw_text: str) -> list[str]:
     cleaned = [w for w in words if w and w not in STOP_WORDS]
     return cleaned
 
-
+#function to count occurrences of a word in text
 def count_word_in_text(raw_text: str, search_word: str) -> int:
     if not raw_text or not search_word:
         return 0
@@ -56,7 +56,7 @@ def count_word_in_text(raw_text: str, search_word: str) -> int:
     target = search_word.strip().lower()
     return sum(1 for w in words if w == target)
 
-
+#function to calculate Jaccard similarity between two lists of words
 def jaccard_similarity(words1: list[str], words2: list[str]) -> tuple[float, set[str]]:
     set1 = set(words1)
     set2 = set(words2)
@@ -70,7 +70,6 @@ def jaccard_similarity(words1: list[str], words2: list[str]) -> tuple[float, set
     similarity = (len(intersection) / len(union)) * 100 if union else 0.0
     return similarity, intersection
 
-
 def prompt_yes_no(message: str) -> bool:
     while True:
         answer = input(message).strip().lower()
@@ -80,7 +79,7 @@ def prompt_yes_no(message: str) -> bool:
             return False
         print("Please enter 'y' or 'n'.")
 
-
+#function to save report of common words to a file
 def save_report(common_words: set[str], reports_dir: str = "reports") -> None:
     if not common_words:
         print("No common words to save.")
@@ -98,7 +97,7 @@ def save_report(common_words: set[str], reports_dir: str = "reports") -> None:
     except OSError as exc:
         print(f"Error writing report file: {exc}")
 
-
+#main function program execution
 def main() -> None:
     essays_dir = "essays"
     essay1_path = os.path.join(essays_dir, "essay1.txt")
@@ -117,6 +116,7 @@ def main() -> None:
     words_essay1 = process_text(essay1_text)
     words_essay2 = process_text(essay2_text)
 
+    #word search feature
     search_word = input("Enter a word to search in both essays: ").strip()
     if search_word:
         count1 = count_word_in_text(essay1_text, search_word)
@@ -125,6 +125,7 @@ def main() -> None:
     else:
         print("No search word provided; skipping word search.")
 
+    #finding common words
     common_words = set(words_essay1).intersection(words_essay2)
     print("\nCommon words in both essays (after cleaning and removing stop words):")
     if common_words:

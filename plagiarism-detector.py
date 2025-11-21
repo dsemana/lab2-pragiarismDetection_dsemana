@@ -21,7 +21,6 @@ STOP_WORDS = {
 
 
 def read_file_text(path: str) -> str:
-    """Read text from a file, returning an empty string if it cannot be read."""
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
@@ -33,27 +32,12 @@ def read_file_text(path: str) -> str:
 
 
 def _normalize_text(text: str) -> str:
-    """
-    Lowercase text and remove punctuation.
-
-    This helper is used by both the processing function and the word search
-    so that behavior is consistent.
-    """
     text = text.lower()
     translator = str.maketrans("", "", string.punctuation)
     return text.translate(translator)
 
 
 def process_text(raw_text: str) -> list[str]:
-    """
-    Process raw text into a clean list of meaningful words.
-
-    Steps:
-    - lowercase
-    - remove punctuation
-    - split into words
-    - filter out stop words
-    """
     if not raw_text:
         return []
 
@@ -64,11 +48,6 @@ def process_text(raw_text: str) -> list[str]:
 
 
 def count_word_in_text(raw_text: str, search_word: str) -> int:
-    """
-    Count the occurrences of a word in the original essay text.
-
-    The text is normalized (lowercase, punctuation removed) before counting.
-    """
     if not raw_text or not search_word:
         return 0
 
@@ -79,12 +58,6 @@ def count_word_in_text(raw_text: str, search_word: str) -> int:
 
 
 def jaccard_similarity(words1: list[str], words2: list[str]) -> tuple[float, set[str]]:
-    """
-    Compute Jaccard similarity between two word lists.
-
-    Returns:
-        (similarity_percentage, intersection_set)
-    """
     set1 = set(words1)
     set2 = set(words2)
 
@@ -99,7 +72,6 @@ def jaccard_similarity(words1: list[str], words2: list[str]) -> tuple[float, set
 
 
 def prompt_yes_no(message: str) -> bool:
-    """Prompt the user for a yes/no answer, returning True for 'y'."""
     while True:
         answer = input(message).strip().lower()
         if answer in {"y", "yes"}:
@@ -110,7 +82,6 @@ def prompt_yes_no(message: str) -> bool:
 
 
 def save_report(common_words: set[str], reports_dir: str = "reports") -> None:
-    """Save the list of common words to a report file."""
     if not common_words:
         print("No common words to save.")
         return
@@ -143,11 +114,9 @@ def main() -> None:
         print("Unable to continue: one or both essay files could not be read or are empty.")
         return
 
-    # Process essays into clean word lists
     words_essay1 = process_text(essay1_text)
     words_essay2 = process_text(essay2_text)
 
-    # Word search feature
     search_word = input("Enter a word to search in both essays: ").strip()
     if search_word:
         count1 = count_word_in_text(essay1_text, search_word)
@@ -156,7 +125,6 @@ def main() -> None:
     else:
         print("No search word provided; skipping word search.")
 
-    # Common words report (based on processed lists)
     common_words = set(words_essay1).intersection(words_essay2)
     print("\nCommon words in both essays (after cleaning and removing stop words):")
     if common_words:
@@ -164,7 +132,7 @@ def main() -> None:
     else:
         print("No common words found.")
 
-    # Plagiarism calculation using Jaccard similarity
+    # Calculation of the plagiarism percentage
     similarity, intersection = jaccard_similarity(words_essay1, words_essay2)
     print("\n=== Plagiarism Report (Jaccard Similarity) ===")
     print(f"Plagiarism percentage: {similarity:.2f}%")
@@ -180,7 +148,7 @@ def main() -> None:
     else:
         print("Intersection is empty; no overlapping meaningful words.")
 
-    # Optionally save report
+    # Save the report
     if prompt_yes_no("\nDo you want to save this report? (y/n): "):
         save_report(intersection)
     else:
